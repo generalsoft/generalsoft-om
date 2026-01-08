@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <!-- Firebase SDK (v9+ modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Your Firebase config (from step 1)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBDq0TkDbMWBmX95SAan780VoX-6OD5RAc",
+      authDomain: "domain-redirects-2ee5c.firebaseapp.com",
+      projectId: "domain-redirects-2ee5c",
+      storageBucket: "domain-redirects-2ee5c.firebasestorage.app",
+      messagingSenderId: "911668933338",
+      appId: "1:911668933338:web:dc52c5792810abcde22be3"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Capture data
+    const domain = window.location.hostname;
+    const referrer = document.referrer || ""; // empty string if none
+    const user_agent = navigator.userAgent || "";
+
+    // Function to log and redirect
+    async function logAndRedirect() {
+      try {
+        // Get public IP (same method you likely used with Supabase)
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        const ip_address = ipData.ip || "";
+
+        // Write log to Firestore
+        await addDoc(collection(db, "redirect_logs"), {
+          domain: domain,
+          referrer: referrer,
+          user_agent: user_agent,
+          ip_address: ip_address,
+          timestamp: serverTimestamp()
+        });
+
+        // Redirect after successful log (delays redirect slightly but ensures log sends)
+        window.location.href = "https://generalsoft.om";
+      } catch (error) {
+        console.error("Logging failed:", error);
+        // Still redirect even if log fails
+        window.location.href = "https://generalsoft.om";
+      }
+    }
+
+    // Run on page load
+    logAndRedirect();
+  </script>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html>
